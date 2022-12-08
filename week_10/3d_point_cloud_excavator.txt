@@ -1,0 +1,29 @@
+from plyfile import PlyData, PlyElement
+
+def read_ply(filename):
+    plydata = PlyData.read(filename)
+    x = np.asarray(plydata.elements[0].data['x'])
+    y = np.asarray(plydata.elements[0].data['y'])
+    z = np.asarray(plydata.elements[0].data['z'])
+    return np.stack([x,y,z], axis=1)
+
+data = read_ply('excavator.ply')
+x = data[:,0]
+y = data[:,1]
+z = data[:,2]
+
+mask = z > 1.0
+
+# Stack with x,y,z values
+X4 = np.column_stack((x[mask], y[mask], z[mask]))
+
+# Perform k-means clustering
+k = 21
+kmeans_cran = KMeans(n_clusters=k, random_state=42).fit(X4)
+
+# 3D plot of image segmentation
+plt.figure(figsize=(6,6))
+ax = plt.axes(projection ='3d')
+ax.view_init(10, -20)
+ax.scatter(x[mask], y[mask], z[mask], c=kmeans_cran.labels_, s=0.05)
+plt.show()
